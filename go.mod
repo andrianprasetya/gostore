@@ -4,6 +4,7 @@ go 1.26.2
 
 require (
 	github.com/fergusstrange/embedded-postgres v1.34.0
+	github.com/gopackx/go-migration v1.0.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 )
@@ -16,7 +17,9 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/lib/pq v1.11.2 // indirect
+	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

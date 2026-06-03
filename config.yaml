@@ -1,0 +1,21 @@
+# Config for the go-migration CLI (cmd/migrator). DB-backed commands use this.
+# The embedded-postgres bootstrap (cmd/server, cmd/migrate-demo) does NOT use
+# this file — it uses DATABASE_URL / embedded PG directly.
+default: primary
+migration_table: migrations
+migration_dir: internal/migrations
+seeder_dir: internal/seed
+factory_dir: internal/seed
+log_level: info
+log_output: console
+
+connections:
+  primary:
+    driver: postgres
+    host: localhost
+    port: 5432
+    database: gostore
+    username: gostore
+    password: gostore
+    options:
+      sslmode: disable
