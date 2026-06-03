@@ -6,13 +6,41 @@ import (
 	"database/sql"
 	"fmt"
 
+	"gostore/internal/idgen"
 	"gostore/internal/migrations"
+	"gostore/internal/models"
 	"gostore/internal/seed"
 
 	"github.com/gopackx/go-migration/pkg/migrator"
 	"github.com/gopackx/go-migration/pkg/schema/grammars"
 	"github.com/gopackx/go-migration/pkg/seeder"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
+
+// AdminEmail / AdminPassword are the well-known demo admin credentials created
+// by EnsureAdmin so admin-only endpoints are testable out of the box.
+const (
+	AdminEmail    = "admin@gostore.dev"
+	AdminPassword = "admin123"
+)
+
+// EnsureAdmin creates the demo admin user if it does not already exist.
+func EnsureAdmin(gdb *gorm.DB) (models.User, error) {
+	var existing models.User
+	if err := gdb.Where("email = ?", AdminEmail).First(&existing).Error; err == nil {
+		return existing, nil
+	}
+	hash, _ := bcrypt.GenerateFromPassword([]byte(AdminPassword), bcrypt.DefaultCost)
+	admin := models.User{
+		UUID: idgen.NewUUID(), Name: "GoStore Admin",
+		Email: AdminEmail, Password: string(hash), Role: "admin", Active: true,
+	}
+	if err := gdb.Create(&admin).Error; err != nil {
+		return models.User{}, err
+	}
+	return admin, nil
+}
 
 // NewMigrator returns a migrator with all GoStore migrations registered.
 func NewMigrator(sqlDB *sql.DB) (*migrator.Migrator, error) {

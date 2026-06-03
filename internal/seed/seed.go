@@ -94,8 +94,8 @@ func (*UserSeeder) Run(db *sql.DB) error {
 		// Force unique emails (faker may collide across 21 rows).
 		email := fmt.Sprintf("u%d_%s", i, u.Email)
 		_, err := db.Exec(
-			`INSERT INTO users (uuid, name, email, password, role, bio, credit, preferences, active)
-			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+			`INSERT INTO users (uuid, name, email, password, role, bio, credit, preferences, active, created_at, updated_at)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, now(), now())`,
 			u.UUID, u.Name, email, u.Password, u.Role, u.Bio, u.Credit, string(prefs), u.Active,
 		)
 		if err != nil {
@@ -112,8 +112,8 @@ func (*ProductSeeder) Run(db *sql.DB) error {
 	for i, p := range ProductFactory().MakeMany(15) {
 		attrs, _ := json.Marshal(p.Attributes)
 		_, err := db.Exec(
-			`INSERT INTO products (uuid, name, sku, details, price, stock, published, attributes)
-			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+			`INSERT INTO products (uuid, name, sku, details, price, stock, published, attributes, created_at, updated_at)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8, now(), now())`,
 			p.UUID, p.Name, fmt.Sprintf("%s-%d", p.SKU, i), p.Details, p.Price, p.Stock, p.Published, string(attrs),
 		)
 		if err != nil {
@@ -159,8 +159,8 @@ func (*OrderSeeder) Run(db *sql.DB) error {
 	for i, uid := range userIDs {
 		var orderID int64
 		err := db.QueryRow(
-			`INSERT INTO orders (user_id, order_number, status, total)
-			 VALUES ($1,$2,$3,$4) RETURNING id`,
+			`INSERT INTO orders (user_id, order_number, status, total, created_at, updated_at)
+			 VALUES ($1,$2,$3,$4, now(), now()) RETURNING id`,
 			uid, fmt.Sprintf("ORD-%05d", i+1), "pending", 0,
 		).Scan(&orderID)
 		if err != nil {
@@ -173,8 +173,8 @@ func (*OrderSeeder) Run(db *sql.DB) error {
 			p := products[(i+j)%len(products)]
 			qty := 1 + (j % 3)
 			if _, err := db.Exec(
-				`INSERT INTO order_items (order_id, product_id, quantity, unit_price)
-				 VALUES ($1,$2,$3,$4)`,
+				`INSERT INTO order_items (order_id, product_id, quantity, unit_price, created_at, updated_at)
+				 VALUES ($1,$2,$3,$4, now(), now())`,
 				orderID, p.id, qty, p.price,
 			); err != nil {
 				return fmt.Errorf("insert order_item: %w", err)

@@ -150,7 +150,37 @@ _(diisi Fase 4 & 7)_
 
 ## Integrasi
 
-_(table ownership, audit-menelan-notif, txID, versi Go/go.mod — diisi sepanjang fase)_
+### Table ownership / urutan migrate (Fase 0-3)
+- **go-migration** memiliki tabel app (`users`, `products`, `orders`, `order_items`)
+  + tracking `migrations`. Dijalankan paling awal (`bootstrap.Fresh/Migrate`).
+- **go-audit** memiliki `audit_logs`, `audit_api_logs` via `AutoMigrate` — dipanggil
+  SETELAH schema app ada. Tidak ada bentrok nama.
+- **go-notification** memiliki `notifications` via `migrate.Up` (Fase 5).
+- Tidak ada bentrok kepemilikan/urutan selama urutannya: migrate app → audit
+  AutoMigrate → notification migrate. GORM **tidak** AutoMigrate tabel app
+  (model hanya memetakan), jadi satu-satunya pembuat schema app adalah go-migration.
+
+### [INTEGRATION] Bug `WHERE WHERE` go-audit memaksa pola handler (Fase 3)
+- Karena BUG `.Where(string).Update/Delete` (lihat go-audit), semua handler
+  GoStore yang meng-update memakai **PK-based** `db.Model(&row).Update(...)`
+  (row sudah di-`First` by id) agar snapshot audit tidak bikin SQL invalid.
+  Contoh: `UploadProductImage`, mark order `paid`. Middleware `Bearer` pakai
+  `First` (SELECT) sehingga aman. Tanpa workaround ini, write akan 500 karena
+  `ErrorFailLoud` meng-`AddError` ke `*gorm.DB`.
+- Kesimpulan: titik integrasi GORM-write × audit-plugin rapuh untuk pola
+  `.Where(string)`. Perbaikan di go-audit akan menghapus batasan ini.
+
+### txID propagation (Fase 3, lengkap di Fase 6)
+- Middleware `Transaction` menaruh `txID` di `context` request (`audit.WithTransactionID`)
+  + header `X-Transaction-ID`. GORM `WithContext(c.Request.Context())` membawanya ke
+  audit data-change; `auditor.API().Record(ctx, ...)` membawanya ke audit API-call;
+  notifikasi memakai ctx yang sama. Terbukti: header `X-Transaction-ID` muncul di
+  response `POST /orders`. Korelasi data+API diverifikasi penuh di Fase 6.
+
+### Versi Go / go.mod (Fase 0)
+- Go 1.26.2. Keempat package + GORM 1.31 + pgx (gorm postgres driver) + gin +
+  embedded-postgres resolve tanpa konflik `require`. Satu-satunya keanehan: adapter
+  GORM go-audit hanya tersedia sebagai pseudo-version (lihat catatan Setup).
 
 ## Ringkasan — Top 5 sebelum dipromosiin
 
