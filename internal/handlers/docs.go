@@ -144,10 +144,21 @@ var MarkNotificationsReadDoc = openswag.Endpoint{
 	},
 }
 
+var AuditTransactionDoc = openswag.Endpoint{
+	Method: "GET", Path: "/audit/transactions/{txid}", Summary: "Correlated audit trail for one transaction",
+	Description: "Returns every data-change and third-party API-call that shared one request's transaction id.",
+	Tags:        []string{"Audit"}, Security: []string{openswag.SecurityApiKey},
+	Parameters: []openswag.Parameter{{Name: "txid", In: "path", Required: true, Description: "Transaction id (from X-Transaction-ID)"}},
+	Responses: map[int]openswag.Response{
+		200: {Description: "OK", Schema: dto.TransactionResponse{}},
+		401: {Description: "Invalid API key", Schema: dto.ErrorResponse{}},
+	},
+}
+
 // Endpoints is the full co-located set, registered via docs.Setup -> AddAll.
 var Endpoints = []openswag.Endpoint{
 	RegisterDoc, LoginDoc,
 	ListProductsDoc, GetProductDoc, CreateProductDoc, UploadProductImageDoc,
 	CreateOrderDoc, GetOrderDoc, AdminListOrdersDoc,
-	GetNotificationsDoc, MarkNotificationsReadDoc, ShowcaseDoc,
+	GetNotificationsDoc, MarkNotificationsReadDoc, AuditTransactionDoc, ShowcaseDoc,
 }

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "GoStore API",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "paths": {
     "/admin/orders": {
@@ -1004,52 +1004,58 @@
           "Products"
         ],
         "summary": "Create a product (admin)",
+        "parameters": [
+          {
+            "name": "reason",
+            "in": "query",
+            "description": "audit reason (new required)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
-          "description": "Product to create",
+          "description": "Product v2",
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "details": {
-                    "type": "string",
-                    "example": "Hot-swappable, 75%"
+                  "currency": {
+                    "type": "string"
                   },
                   "name": {
-                    "type": "string",
-                    "example": "Mechanical Keyboard"
+                    "type": "string"
                   },
                   "price": {
-                    "type": "number",
-                    "format": "double",
-                    "example": 129.99
-                  },
-                  "published": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer"
+                      },
+                      "currency": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "currency"
+                    ]
                   },
                   "sku": {
-                    "type": "string",
-                    "example": "KB-001"
+                    "type": "string"
                   },
                   "stock": {
                     "type": "integer",
-                    "format": "int64",
-                    "example": 50
-                  },
-                  "tags": {
-                    "type": "array",
-                    "description": "Free-form tags",
-                    "example": "mechanical",
-                    "items": {
-                      "type": "string"
-                    }
+                    "format": "int64"
                   }
                 },
                 "required": [
                   "name",
                   "sku",
-                  "price"
+                  "price",
+                  "currency"
                 ]
               }
             }
@@ -1234,29 +1240,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer",
-                      "example": 404
-                    },
-                    "details": {
-                      "type": "string"
-                    },
-                    "error": {
-                      "type": "string",
-                      "example": "not found"
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -1343,158 +1326,6 @@
           }
         ]
       }
-    },
-    "/showcase": {
-      "get": {
-        "tags": [
-          "Showcase"
-        ],
-        "summary": "Edge-type schema showcase",
-        "description": "Exercises pointer / time.Time / slice-of-struct / nested / map / no-tag / enum / uuid / []byte.",
-        "parameters": [
-          {
-            "name": "filter",
-            "in": "query",
-            "description": "Required query param",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "Untagged": {
-                      "type": "string",
-                      "description": "no json tag -\u003e field name used"
-                    },
-                    "id": {
-                      "type": "string",
-                      "format": "uuid",
-                      "description": "uuid format hint"
-                    },
-                    "items": {
-                      "type": "array",
-                      "description": "slice of struct",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "product_id": {
-                            "type": "integer",
-                            "format": "int64",
-                            "example": 1
-                          },
-                          "quantity": {
-                            "type": "integer",
-                            "example": 2
-                          },
-                          "unit_price": {
-                            "type": "number",
-                            "format": "double",
-                            "example": 129.99
-                          }
-                        }
-                      }
-                    },
-                    "meta": {
-                      "type": "object",
-                      "description": "map -\u003e additionalProperties",
-                      "additionalProperties": {
-                        "type": "integer"
-                      }
-                    },
-                    "optional": {
-                      "type": "string",
-                      "description": "pointer -\u003e nullable-ish"
-                    },
-                    "raw_payload": {
-                      "type": "string",
-                      "format": "byte",
-                      "description": "[]byte -\u003e string/byte"
-                    },
-                    "ship": {
-                      "type": "object",
-                      "description": "nested struct",
-                      "properties": {
-                        "city": {
-                          "type": "string",
-                          "example": "Jakarta"
-                        },
-                        "country": {
-                          "type": "string",
-                          "example": "ID"
-                        },
-                        "line1": {
-                          "type": "string",
-                          "example": "Jl. Sudirman 1"
-                        },
-                        "postal_code": {
-                          "type": "string",
-                          "example": "10220"
-                        }
-                      }
-                    },
-                    "status": {
-                      "type": "string",
-                      "description": "enum-ish; one of active|inactive",
-                      "example": "active"
-                    },
-                    "tags": {
-                      "type": "array",
-                      "example": "a",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "when": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "time.Time -\u003e string/date-time"
-                    }
-                  },
-                  "required": [
-                    "status"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer",
-                      "example": 404
-                    },
-                    "details": {
-                      "type": "string"
-                    },
-                    "error": {
-                      "type": "string",
-                      "example": "not found"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyQuery": []
-          }
-        ]
-      }
     }
   },
   "components": {
@@ -1504,17 +1335,6 @@
         "description": "API key in X-API-Key header",
         "name": "X-API-Key",
         "in": "header"
-      },
-      "apiKeyQuery": {
-        "type": "apiKey",
-        "description": "API key in query parameter",
-        "name": "api_key",
-        "in": "query"
-      },
-      "basicAuth": {
-        "type": "http",
-        "description": "HTTP Basic authentication",
-        "scheme": "basic"
       },
       "bearerAuth": {
         "type": "http",

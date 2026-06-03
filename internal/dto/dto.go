@@ -123,6 +123,36 @@ type NotificationListResponse struct {
 	Unread int                `json:"unread" example:"2"`
 }
 
+// --- audit (txID correlation showcase) ---
+
+type AuditDataChange struct {
+	ID         uint64         `json:"id"`
+	EntityType string         `json:"entity_type" example:"orders"`
+	EntityID   string         `json:"entity_id" example:"12"`
+	Action     string         `json:"action" example:"create" description:"create|update|delete|soft_delete|restore"`
+	OldValues  map[string]any `json:"old_values,omitempty"`
+	NewValues  map[string]any `json:"new_values,omitempty"`
+	UserID     string         `json:"user_id" example:"42"`
+	CreatedAt  time.Time      `json:"created_at" format:"date-time"`
+}
+
+type AuditAPICall struct {
+	ID         uint64    `json:"id"`
+	Service    string    `json:"service" example:"payment-gateway"`
+	Endpoint   string    `json:"endpoint" example:"/v1/charges"`
+	Method     string    `json:"method" example:"POST"`
+	StatusCode int       `json:"status_code" example:"200"`
+	DurationMs int       `json:"duration_ms" example:"6"`
+	CreatedAt  time.Time `json:"created_at" format:"date-time"`
+}
+
+type TransactionResponse struct {
+	TransactionID string            `json:"transaction_id" example:"20260603T050002-..."`
+	DataChanges   []AuditDataChange `json:"data_changes"`
+	APICalls      []AuditAPICall    `json:"api_calls"`
+	Summary       map[string]int    `json:"summary" description:"counts per kind"`
+}
+
 // --- doc edge-type showcase (Fase 4) ---
 
 // EdgeShowcase deliberately exercises the schema generator's tricky cases:

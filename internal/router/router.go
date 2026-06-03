@@ -32,6 +32,10 @@ func New(h *handlers.Handler, db *gorm.DB, docsMount func(*gin.Engine)) *gin.Eng
 	admin := r.Group("/admin", middleware.APIKey(h.AdminAPIKey))
 	admin.GET("/orders", h.AdminListOrders)
 
+	// Audit transaction correlation view (service / API key).
+	auditg := r.Group("/audit", middleware.APIKey(h.AdminAPIKey))
+	auditg.GET("/transactions/:txid", h.AuditTransaction)
+
 	if docsMount != nil {
 		docsMount(r)
 	}

@@ -114,6 +114,20 @@ Entry format:
 - Dampak: kosmetik tapi membingungkan konsumen yang membedakan NULL vs `null`.
 - Saran: di `jsonMarshal` cek juga nil via reflect (`reflect.ValueOf(v).IsNil()` untuk map/slice/ptr), atau di `RecordDataChange` lewatkan `nil` eksplisit saat map kosong.
 
+### [BUG] Nested GORM `Create` (assosiasi) → audit child rows ter-duplikasi — [go-audit/adapters/gorm]
+- Fitur: auto-capture create untuk `db.Create(&order)` dengan `order.Items` nested.
+- Ekspektasi: 1 audit row per child (2 order_items → 2 audit create rows).
+- Aktual (Fase 6 E2E, `GET /audit/transactions/{txID}`): tiap order_item ke-audit
+  **dua kali** (2 item → 4 row create; lihat id 3,6 utk item 16 dan id 4,7 utk item 17),
+  semuanya di bawah txID yang sama. Order parent ke-audit sekali (benar).
+- Root cause (dugaan): GORM saat nested create menyentuh baris asosiasi lebih dari
+  sekali (insert lalu update FK saat PK parent diketahui), dan callback
+  `afterCreate` adapter merekam tiap kali → duplikasi.
+- Dampak: noise di audit trail untuk relasi nested (umum di e-commerce/CRUD).
+- Repro: handler `CreateOrder` (satu `Create(&order)` dgn items) → cek `audit_logs`.
+- Saran: dedup per (entity_type, entity_id, action, txID) dalam satu statement,
+  atau rekam child hanya pada insert awal, bukan pada update FK susulan.
+
 ### [DX/DOCS] `RedactBodyFields` tidak meredaksi body bertipe struct — [go-audit]
 - Fitur: redaksi body API (`redactBody`/`redactWalk`).
 - Ekspektasi: README API logging memakai `RequestBody: req` di mana `req` adalah **struct**.
@@ -229,7 +243,30 @@ Entry format:
 - Nama scheme custom apa pun **diam-diam** jadi http-bearer (cabang `default`). Cookie auth (README) tak ada.
 - Saran: tambah cookie scheme, atau hapus dari README; dokumentasikan perilaku default custom-scheme.
 
+### [MISSING] Version diff tidak mendeteksi perubahan TIPE field (req/resp) — [open-swag-go/versioning]
+- Fitur: `versioning.Differ` (Fase 7).
+- Ekspektasi: perubahan `Product.Price` dari `number` → object `{amount,currency}`
+  (contoh persis di plan) terdeteksi sebagai breaking (`BreakingTypeChanged` ada
+  di `DefaultBreakingRules`).
+- Aktual: `compareOperations` hanya membandingkan: endpoint dihapus, request body
+  ada/tidak, **daftar required** request body, **kode response**, dan parameter.
+  Perubahan **tipe** field di body/response **tidak** dibandingkan → tidak dilaporkan.
+  `BreakingTypeChanged` terdefinisi tapi tak pernah dipakai. (Terbukti: v2 GoStore
+  mengubah price→object tapi diff tak menyebutnya; lihat `cmd/version-diff`.)
+- Yang BERHASIL terdeteksi (4 breaking, dgn pesan migrasi masuk akal): endpoint
+  dihapus (`/showcase`), field required baru (`currency`), parameter required baru
+  (`reason`), kode response dihapus (404 di `GET /products/{id}`).
+- Saran: bandingkan tipe schema field (dan format) di request body + response;
+  wire `BreakingTypeChanged`. Juga: penambahan field optional & perubahan deskripsi
+  saat ini tidak dianggap perubahan (wajar), tapi type-change adalah gap nyata.
+
 ### Positif (kuat untuk LinkedIn)
+- **Fase 8 (TS type-gen):** `openapi-typescript@6` membaca spec 3.1.0 dan
+  menghasilkan `frontend-types/api.d.ts` (885 baris). Semua edge-type kebawa
+  **tepat**: `uuid`→`Format: uuid`, map→`{ [key: string]: number }`, nested,
+  slice-of-struct→array object, `[]byte`→`Format: byte`, field tanpa json-tag→`Untagged`,
+  format `int64`/`double`/`date-time`, contoh & deskripsi, required vs optional. Tanpa mismatch.
+  (Catatan env: mesin pakai Node 14; CLI dipanggil via `node .../bin/cli.js`.)
 - Edge-type mapping benar: pointer (unwrap), `time.Time`→`date-time`, `time.Duration`→`duration`,
   `[]byte`→`string/byte`, `uuid.UUID`→`uuid`, slice-of-struct→array/object, nested struct,
   `map`→object+additionalProperties, `interface{}`→schema kosong (any), field tanpa json-tag→nama field,

@@ -13,6 +13,7 @@ import (
 	"gostore/internal/docs"
 	"gostore/internal/handlers"
 	"gostore/internal/notify"
+	"gostore/internal/payment"
 	"gostore/internal/router"
 
 	"github.com/gin-gonic/gin"
@@ -67,6 +68,7 @@ func main() {
 		Auditor:     auditor,
 		Notifier:    notifySvc,
 		NotifCenter: notifySvc,
+		Payment:     payment.MockGateway(auditor),
 		AdminAPIKey: apiKey,
 	}
 

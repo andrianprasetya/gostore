@@ -5,6 +5,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -347,6 +348,44 @@ func (h *Handler) Showcase(c *gin.Context) {
 		Status:   "active",
 		Tags:     []string{"demo", "edge"},
 	})
+}
+
+// AuditTransaction returns every data-change and API-call correlated under one
+// transaction id — the core of the GoStore "one request, four packages" demo.
+func (h *Handler) AuditTransaction(c *gin.Context) {
+	txID := c.Param("txid")
+	tl, err := h.Auditor.QueryByTransaction(c.Request.Context(), txID)
+	if err != nil {
+		badRequest(c, err.Error())
+		return
+	}
+	resp := dto.TransactionResponse{TransactionID: tl.TransactionID}
+	for _, d := range tl.DataLogs {
+		resp.DataChanges = append(resp.DataChanges, dto.AuditDataChange{
+			ID: d.ID, EntityType: d.EntityType, EntityID: d.EntityID, Action: d.Action,
+			OldValues: rawToMap(d.OldValues), NewValues: rawToMap(d.NewValues),
+			UserID: d.UserID, CreatedAt: d.CreatedAt,
+		})
+	}
+	for _, a := range tl.APILogs {
+		resp.APICalls = append(resp.APICalls, dto.AuditAPICall{
+			ID: a.ID, Service: a.Service, Endpoint: a.Endpoint, Method: a.Method,
+			StatusCode: a.StatusCode, DurationMs: a.DurationMs, CreatedAt: a.CreatedAt,
+		})
+	}
+	resp.Summary = map[string]int{"data_changes": len(resp.DataChanges), "api_calls": len(resp.APICalls)}
+	c.JSON(http.StatusOK, resp)
+}
+
+func rawToMap(raw []byte) map[string]any {
+	if len(raw) == 0 {
+		return nil
+	}
+	var m map[string]any
+	if err := json.Unmarshal(raw, &m); err != nil {
+		return nil
+	}
+	return m
 }
 
 // --- mapping + error helpers ---
