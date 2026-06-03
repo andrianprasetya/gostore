@@ -10,6 +10,7 @@ import (
 	"gostore/internal/audit"
 	"gostore/internal/bootstrap"
 	"gostore/internal/db"
+	"gostore/internal/docs"
 	"gostore/internal/handlers"
 	"gostore/internal/router"
 
@@ -60,7 +61,7 @@ func main() {
 		AdminAPIKey: apiKey,
 	}
 
-	r := router.New(h, conn.Gorm, nil) // docs mounted in Fase 4
+	r := router.New(h, conn.Gorm, docs.GinMount("/docs"))
 
 	addr := os.Getenv("GOSTORE_ADDR")
 	if addr == "" {

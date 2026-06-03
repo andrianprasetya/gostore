@@ -146,7 +146,64 @@ _(diisi Fase 5)_
 
 ## open-swag-go
 
-_(diisi Fase 4 & 7)_
+> Verdict Fase 4: **engine schema bagus, tapi README menyesatkan + 2 BUG.**
+> Spec valid OpenAPI 3.1.0, edge-type mapping benar, adapter Gin == Chi (byte-identik),
+> UI Scalar render, try-it manggil handler asli. Tapi seluruh contoh README pakai
+> API yang tidak ada di v1.1.1, multipart tak terdokumentasi, dan tipe rekursif
+> bikin crash.
+
+### [DOCS] README mendokumentasikan API yang TIDAK ADA di v1.1.1 — [open-swag-go]
+- Fitur: hampir seluruh contoh README (Quick Start, Co-located, Request Body, Parameters, Auth, Config).
+- Ekspektasi (README): helper `openswag.Body(T{})`, `BodyWithDesc(...)`, `FormBody(...)`,
+  `Response("desc", T{})`, `Responses{...}`, `PathParam/QueryParam/HeaderParam/RequiredQueryParam(...)`,
+  `BearerAuth/APIKeyAuth/BasicAuth/CookieAuth(...)`, dan `Config.Auth = AuthConfig{Schemes: [...]}`.
+- Aktual (v1.1.1): **tidak satupun fungsi/field itu ada** (dicek: `grep` di seluruh package nihil).
+  API sebenarnya berbasis struct-literal:
+  ```go
+  RequestBody: &openswag.RequestBody{Schema: T{}, Required: true, ContentType: "application/json"},
+  Responses:   map[int]openswag.Response{201: {Description: "Created", Schema: T{}}},
+  Parameters:  []openswag.Parameter{{Name: "id", In: "path", Required: true}},
+  Security:    []string{openswag.SecurityBearerAuth}, // konstanta string predefined
+  ```
+  Tidak ada `Config.Auth`; security scheme otomatis ditambah dari `Endpoint.Security`.
+- Dampak: tinggi — hal pertama yang dicopy user (Quick Start) **tidak compile**.
+- Saran: sinkronkan README dengan API v1.1.1, atau sediakan helper yang dijanjikan README.
+
+### [BUG] `RequestBody.ContentType` diabaikan — multipart/form-data tak bisa didokumentasikan — [open-swag-go]
+- Fitur: file upload (`POST /products/{id}/image`, ContentType `multipart/form-data`).
+- Ekspektasi: requestBody di spec ber-content `multipart/form-data`.
+- Aktual: `buildOperation` menghitung `contentType` dari `ep.RequestBody.ContentType`
+  tapi **tidak pernah memakainya** — selalu `spec.NewRequestBody(...).WithJSONContent(s)`.
+  Hasil spec selalu `application/json`. (`spec/openapi-v1.json` → `/products/{id}/image`
+  content-types = `["application/json"]`).
+- Dampak: endpoint upload terdokumentasi salah; konsep `FormBody` (README) tak ada efek.
+- Saran: pakai `ContentType` saat membangun requestBody (`WithContent(contentType, s)`).
+
+### [BUG] Tipe rekursif/self-referential → stack overflow saat generate spec — [open-swag-go]
+- Fitur: `schema.fromReflectType` (rekursi struct field).
+- Ekspektasi: tipe seperti `Category{ Children []Category }` (tree/menu/komentar berjenjang) menghasilkan schema (idealnya pakai `$ref`).
+- Aktual: tidak ada visited-set/guard kedalaman → rekursi tak berujung →
+  `fatal error: stack overflow` (tidak bisa di-recover). Repro: `cmd/recursion-test`
+  → `runtime: goroutine stack exceeds 1000000000-byte limit`.
+- Dampak: tinggi — model self-referential apa pun meng-crash generate spec/boot server.
+- Saran: lacak tipe yang sudah dikunjungi dan emit `$ref` ke `components.schemas`
+  (sekaligus memperkecil spec), atau minimal batasi kedalaman + error rapi.
+
+### [DX/DOCS] Tidak ada Cookie auth walau README menampilkan `CookieAuth` — [open-swag-go]
+- Predefined hanya: `SecurityBearerAuth`(http bearer), `SecurityBasicAuth`,
+  `SecurityApiKey`(header X-API-Key), `SecurityApiKeyQuery`(?api_key=), `SecurityOAuth2`.
+- Nama scheme custom apa pun **diam-diam** jadi http-bearer (cabang `default`). Cookie auth (README) tak ada.
+- Saran: tambah cookie scheme, atau hapus dari README; dokumentasikan perilaku default custom-scheme.
+
+### Positif (kuat untuk LinkedIn)
+- Edge-type mapping benar: pointer (unwrap), `time.Time`→`date-time`, `time.Duration`→`duration`,
+  `[]byte`→`string/byte`, `uuid.UUID`→`uuid`, slice-of-struct→array/object, nested struct,
+  `map`→object+additionalProperties, `interface{}`→schema kosong (any), field tanpa json-tag→nama field,
+  embedded struct di-flatten, `format:"uuid"`/`swagger:"required"`/`example`/`description` terbaca.
+- **Adapter Gin == Chi**: `/docs/openapi.json` (Gin) dan `/docs-chi/openapi.json` (Chi) **byte-identik** (37839 B).
+- UI Scalar render (theme `purple` + dark), `/docs`→`/docs/` redirect 301, spec via `./openapi.json`.
+- Try-it memanggil handler asli (mis. `/showcase?filter=demo` balikin EdgeShowcase nyata).
+- Output OpenAPI **3.1.0**.
 
 ## Integrasi
 

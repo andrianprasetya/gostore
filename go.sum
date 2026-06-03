@@ -19,6 +19,8 @@ github.com/gin-contrib/sse v1.1.0 h1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w
 github.com/gin-contrib/sse v1.1.0/go.mod h1:hxRZ5gVpWMT7Z0B0gSNYqqsSCNIJMjzvm6fqCz9vjwM=
 github.com/gin-gonic/gin v1.12.0 h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=
 github.com/gin-gonic/gin v1.12.0/go.mod h1:VxccKfsSllpKshkBWgVgRniFFAzFb9csfngsqANjnLc=
+github.com/go-chi/chi/v5 v5.3.0 h1:halUjDxhshgXHMrao5bB8eNBXo/rnzwr8m5m36glehM=
+github.com/go-chi/chi/v5 v5.3.0/go.mod h1:R+tYY2hNuVUUjxoPtqUdgBqevM9s9njzkTLutVsOCto=
 github.com/go-playground/assert/v2 v2.2.0 h1:JvknZsQTYeFEAhQwI4qEt9cyV5ONwRHC+lYKSsYSR8s=
 github.com/go-playground/assert/v2 v2.2.0/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/locales v0.14.1 h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=
@@ -40,6 +42,8 @@ github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b h1:
 github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b/go.mod h1:TUeNWsxEwNyKZVEj0NOGE4Kf/k/MCyW1nfaB89tzKh0=
 github.com/gopackx/go-migration v1.0.0 h1:v4Y+hImanHqhOLuYQSZJoKh6kFCTdDq2U+OOIWN1hOo=
 github.com/gopackx/go-migration v1.0.0/go.mod h1:j9+xlZ9/QPBeidpuDRPXvsIytpeWvFy+r9IBKuGF/sU=
+github.com/gopackx/open-swag-go v1.1.1 h1:B7yXFuBpER7BRBD/SdXbIigy4AXDkGPn2MLYgLVK/mM=
+github.com/gopackx/open-swag-go v1.1.1/go.mod h1:uxlx4t/JCIWmO4wm1IWc7tjWtJmqXeNrIQu/NvRuVBU=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
 github.com/jackc/pgpassfile v1.0.0/go.mod h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=
 github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=

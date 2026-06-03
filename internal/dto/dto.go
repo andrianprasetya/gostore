@@ -105,3 +105,30 @@ type ErrorResponse struct {
 type MessageResponse struct {
 	Message string `json:"message" example:"ok"`
 }
+
+// --- doc edge-type showcase (Fase 4) ---
+
+// EdgeShowcase deliberately exercises the schema generator's tricky cases:
+// pointer, time.Time, slice-of-struct, nested struct, map, a field with no
+// json tag, an enum-ish field, and a uuid format hint.
+type EdgeShowcase struct {
+	ID         string              `json:"id" format:"uuid" description:"uuid format hint"`
+	Optional   *string             `json:"optional,omitempty" description:"pointer -> nullable-ish"`
+	When       time.Time           `json:"when" description:"time.Time -> string/date-time"`
+	Items      []OrderItemResponse `json:"items" description:"slice of struct"`
+	Ship       ShippingAddress     `json:"ship" description:"nested struct"`
+	Meta       map[string]int      `json:"meta" description:"map -> additionalProperties"`
+	Untagged   string              `description:"no json tag -> field name used"`
+	Status     string              `json:"status" swagger:"required" example:"active" description:"enum-ish; one of active|inactive"`
+	Tags       []string            `json:"tags" example:"a"`
+	RawPayload []byte              `json:"raw_payload" description:"[]byte -> string/byte"`
+}
+
+// Category is a self-referential type used ONLY by the isolated recursion test
+// (cmd/recursion-test). Do NOT add it to the served spec — the v1.1.1 schema
+// generator recurses without a visited-set and stack-overflows on it.
+type Category struct {
+	ID       string     `json:"id"`
+	Name     string     `json:"name"`
+	Children []Category `json:"children"`
+}

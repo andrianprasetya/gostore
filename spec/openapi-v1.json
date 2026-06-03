@@ -1,0 +1,1269 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GoStore API",
+    "version": "1.0.0",
+    "description": "Dogfooding the **gopackx** stack: migration + audit + notification + docs.",
+    "contact": {
+      "name": "Andrian Prasetya",
+      "url": "https://github.com/andrianprasetya"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local"
+    }
+  ],
+  "paths": {
+    "/admin/orders": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List all orders (service / API key)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": 1
+                          },
+                          "quantity": {
+                            "type": "integer",
+                            "example": 2
+                          },
+                          "unit_price": {
+                            "type": "number",
+                            "format": "double",
+                            "example": 129.99
+                          }
+                        }
+                      }
+                    },
+                    "order_number": {
+                      "type": "string",
+                      "example": "ORD-2026-0001"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "pending | paid | shipped | cancelled",
+                      "example": "paid"
+                    },
+                    "total": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 259.98
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login with email + password",
+        "requestBody": {
+          "description": "Credentials",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "andrian@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "s3cret-pass"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "Bearer token for subsequent requests",
+                      "example": "42"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "example": 42
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Andrian Prasetya"
+                        },
+                        "role": {
+                          "type": "string",
+                          "description": "customer | admin",
+                          "example": "customer"
+                        },
+                        "uuid": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register a new customer",
+        "requestBody": {
+          "description": "Registration payload",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "andrian@example.com"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Full name",
+                    "example": "Andrian Prasetya"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Min 6 chars",
+                    "example": "s3cret-pass"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "Bearer token for subsequent requests",
+                      "example": "42"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "example": 42
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Andrian Prasetya"
+                        },
+                        "role": {
+                          "type": "string",
+                          "description": "customer | admin",
+                          "example": "customer"
+                        },
+                        "uuid": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Place an order (nested items)",
+        "requestBody": {
+          "description": "Order with line items",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "description": "Order line items",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "product_id": {
+                          "type": "integer",
+                          "format": "int64",
+                          "example": 1
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "example": 2
+                        }
+                      },
+                      "required": [
+                        "product_id",
+                        "quantity"
+                      ]
+                    }
+                  },
+                  "shipping_address": {
+                    "type": "object",
+                    "properties": {
+                      "city": {
+                        "type": "string",
+                        "example": "Jakarta"
+                      },
+                      "country": {
+                        "type": "string",
+                        "example": "ID"
+                      },
+                      "line1": {
+                        "type": "string",
+                        "example": "Jl. Sudirman 1"
+                      },
+                      "postal_code": {
+                        "type": "string",
+                        "example": "10220"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "items"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": 1
+                          },
+                          "quantity": {
+                            "type": "integer",
+                            "example": 2
+                          },
+                          "unit_price": {
+                            "type": "number",
+                            "format": "double",
+                            "example": 129.99
+                          }
+                        }
+                      }
+                    },
+                    "order_number": {
+                      "type": "string",
+                      "example": "ORD-2026-0001"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "pending | paid | shipped | cancelled",
+                      "example": "paid"
+                    },
+                    "total": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 259.98
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Get an order by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Order id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": 1
+                          },
+                          "quantity": {
+                            "type": "integer",
+                            "example": 2
+                          },
+                          "unit_price": {
+                            "type": "number",
+                            "format": "double",
+                            "example": 129.99
+                          }
+                        }
+                      }
+                    },
+                    "order_number": {
+                      "type": "string",
+                      "example": "ORD-2026-0001"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "pending | paid | shipped | cancelled",
+                      "example": "paid"
+                    },
+                    "total": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 259.98
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "List published products",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Page size (default 20)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Page offset (default 0)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "all",
+            "in": "query",
+            "description": "Include unpublished (true/false)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "description": "Optional client trace id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "barcode": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "details": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Mechanical Keyboard"
+                          },
+                          "price": {
+                            "type": "number",
+                            "format": "double",
+                            "example": 129.99
+                          },
+                          "published": {
+                            "type": "boolean",
+                            "example": true
+                          },
+                          "sku": {
+                            "type": "string",
+                            "example": "KB-001"
+                          },
+                          "stock": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": 50
+                          },
+                          "uuid": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 42
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Create a product (admin)",
+        "requestBody": {
+          "description": "Product to create",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "details": {
+                    "type": "string",
+                    "example": "Hot-swappable, 75%"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Mechanical Keyboard"
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "double",
+                    "example": 129.99
+                  },
+                  "published": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "sku": {
+                    "type": "string",
+                    "example": "KB-001"
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 50
+                  },
+                  "tags": {
+                    "type": "array",
+                    "description": "Free-form tags",
+                    "example": "mechanical",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "sku",
+                  "price"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "barcode": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Mechanical Keyboard"
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 129.99
+                    },
+                    "published": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "sku": {
+                      "type": "string",
+                      "example": "KB-001"
+                    },
+                    "stock": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 50
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden (not admin)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get a product by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Product id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "barcode": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Mechanical Keyboard"
+                    },
+                    "price": {
+                      "type": "number",
+                      "format": "double",
+                      "example": 129.99
+                    },
+                    "published": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "sku": {
+                      "type": "string",
+                      "example": "KB-001"
+                    },
+                    "stock": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 50
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/image": {
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Upload a product image (multipart)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Product id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "multipart/form-data with an 'image' file field",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/showcase": {
+      "get": {
+        "tags": [
+          "Showcase"
+        ],
+        "summary": "Edge-type schema showcase",
+        "description": "Exercises pointer / time.Time / slice-of-struct / nested / map / no-tag / enum / uuid / []byte.",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Required query param",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Untagged": {
+                      "type": "string",
+                      "description": "no json tag -\u003e field name used"
+                    },
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "uuid format hint"
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "slice of struct",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "integer",
+                            "format": "int64",
+                            "example": 1
+                          },
+                          "quantity": {
+                            "type": "integer",
+                            "example": 2
+                          },
+                          "unit_price": {
+                            "type": "number",
+                            "format": "double",
+                            "example": 129.99
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "description": "map -\u003e additionalProperties",
+                      "additionalProperties": {
+                        "type": "integer"
+                      }
+                    },
+                    "optional": {
+                      "type": "string",
+                      "description": "pointer -\u003e nullable-ish"
+                    },
+                    "raw_payload": {
+                      "type": "string",
+                      "format": "byte",
+                      "description": "[]byte -\u003e string/byte"
+                    },
+                    "ship": {
+                      "type": "object",
+                      "description": "nested struct",
+                      "properties": {
+                        "city": {
+                          "type": "string",
+                          "example": "Jakarta"
+                        },
+                        "country": {
+                          "type": "string",
+                          "example": "ID"
+                        },
+                        "line1": {
+                          "type": "string",
+                          "example": "Jl. Sudirman 1"
+                        },
+                        "postal_code": {
+                          "type": "string",
+                          "example": "10220"
+                        }
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "enum-ish; one of active|inactive",
+                      "example": "active"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "example": "a",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "when": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "time.Time -\u003e string/date-time"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "details": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyQuery": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "description": "API key in X-API-Key header",
+        "name": "X-API-Key",
+        "in": "header"
+      },
+      "apiKeyQuery": {
+        "type": "apiKey",
+        "description": "API key in query parameter",
+        "name": "api_key",
+        "in": "query"
+      },
+      "basicAuth": {
+        "type": "http",
+        "description": "HTTP Basic authentication",
+        "scheme": "basic"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "description": "JWT Bearer token authentication",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Registration \u0026 login"
+    },
+    {
+      "name": "Products",
+      "description": "Catalog"
+    },
+    {
+      "name": "Orders",
+      "description": "Checkout"
+    },
+    {
+      "name": "Admin",
+      "description": "Service-account endpoints"
+    },
+    {
+      "name": "Showcase",
+      "description": "Edge-type schema demo"
+    }
+  ]
+}

@@ -5,9 +5,11 @@ go 1.26.2
 require (
 	github.com/fergusstrange/embedded-postgres v1.34.0
 	github.com/gin-gonic/gin v1.12.0
+	github.com/go-chi/chi/v5 v5.3.0
 	github.com/gopackx/go-audit v1.0.0
 	github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b
 	github.com/gopackx/go-migration v1.0.0
+	github.com/gopackx/open-swag-go v1.1.1
 	golang.org/x/crypto v0.52.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1

@@ -19,6 +19,7 @@ func New(h *handlers.Handler, db *gorm.DB, docsMount func(*gin.Engine)) *gin.Eng
 	r.POST("/auth/login", h.Login)
 	r.GET("/products", h.ListProducts)
 	r.GET("/products/:id", h.GetProduct)
+	r.GET("/showcase", h.Showcase)
 
 	auth := r.Group("/", middleware.Bearer(db))
 	auth.POST("/products", middleware.RequireAdmin(), h.CreateProduct)

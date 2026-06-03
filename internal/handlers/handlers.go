@@ -283,6 +283,27 @@ func (h *Handler) AdminListOrders(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": out, "total": len(out)})
 }
 
+// Showcase returns a sample EdgeShowcase so the docs try-it console renders a
+// real response for the edge-type endpoint.
+func (h *Handler) Showcase(c *gin.Context) {
+	if c.Query("filter") == "" {
+		badRequest(c, "missing required query param 'filter'")
+		return
+	}
+	opt := "present"
+	c.JSON(http.StatusOK, dto.EdgeShowcase{
+		ID:       idgen.NewUUID(),
+		Optional: &opt,
+		When:     time.Now(),
+		Items:    []dto.OrderItemResponse{{ProductID: 1, Quantity: 2, UnitPrice: 9.99}},
+		Ship:     dto.ShippingAddress{Line1: "Jl. Sudirman 1", City: "Jakarta", PostalCode: "10220", Country: "ID"},
+		Meta:     map[string]int{"views": 12, "likes": 3},
+		Untagged: "no-json-tag-field",
+		Status:   "active",
+		Tags:     []string{"demo", "edge"},
+	})
+}
+
 // --- mapping + error helpers ---
 
 func toUserResp(u models.User) dto.UserResponse {
