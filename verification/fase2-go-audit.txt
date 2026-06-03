@@ -1,0 +1,20 @@
+[PASS] AutoMigrate creates audit tables — audit_logs + audit_api_logs present
+[PASS] Create captured — 1 create log(s), user=42
+[PASS] Create new_values populated — new_values has all fields
+[PASS] Create old_values quirk (jsonb 'null' not SQL NULL) — old_values="null" (typed-nil marshalled to 'null')
+[PASS] Update captured with diff — diff contains only changed field (price)
+[PASS] ExcludeFields drops password — password absent from audit new_values
+[PASS] Soft delete -> action soft_delete — 1 soft_delete log(s)
+[PASS] Unscoped (hard) delete -> action delete — 1 delete log(s)
+[PASS] BUG: .Where(...).Update doubles WHERE in snapshot SELECT — err=go-audit: snapshot before update: ERROR: syntax error at or near "WHERE" (SQLSTATE 42601)
+[PASS] API redacts Authorization header — header redacted, token gone
+[PASS] API redacts body fields (card_number, cvv) — card_number + cvv redacted in stored body
+[PASS] API truncates oversized body — body > MaxBodySize -> _truncated envelope
+[PASS] txID correlates data-change + API-call — data=1 api=1 under one txID
+[PASS] Snapshot reconstructs past state — price@midpoint=20 (expected 20)
+[PASS] Restore records action=restore — restore entry written, target price=20
+[PASS] Query by EntityType — 14 product audit rows
+[PASS] Purge deletes old rows — purged data=15 api=3, remaining=0
+[PASS] ExcludeEntities keeps notifications out of audit — 0 audit rows for notifications (expected 0)
+================ Fase 2 coverage ================
+Total: 18 checks, 0 failed

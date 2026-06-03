@@ -1,0 +1,11 @@
+[PASS] Welcome persisted via database channel (async) — 1 unread, type=user.welcome
+[PASS] OrderPlaced persisted (2 unread total) — 2 unread
+[PASS] MarkAllRead clears unread — 0 unread after mark
+[PASS] Thread-safe async pool: 50 concurrent sends persist — 50/50 persisted
+[PASS] Sync() blocks until delivered — count=1 immediately after Send
+[PASS] Via() override sends only the chosen channel — a=1 b=0
+[PASS] OnError fires after retries exhausted — OnError called 1 time(s), err=simulated permanent failure
+[PASS] Send after Close returns ErrClosed — err=notification: notifier closed
+[PASS] Rate limiter handles burst without crashing — 20/20 sent ok, delivered=20
+================ Fase 5 coverage ================
+Total: 9 checks, 0 failed

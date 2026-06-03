@@ -1,0 +1,25 @@
+[PASS] Up runs all migrations — order_items table created
+[PASS] Regular Index (multi-statement Exec) — idx_products_name present
+[PASS] Combined UniqueIndex — unique (order_id, product_id) present
+[PASS] Alter: add column — products.barcode added
+[PASS] Alter: rename column — description -> details
+[PASS] Alter: drop column — temp_flag dropped
+[PASS] JSON maps to jsonb — users.preferences is jsonb
+[PASS] UUID native type — users.uuid is uuid
+[PASS] Unsigned() ignored on PG (no error) — users.credit is bigint
+[PASS] HasTable — orders=true, nope_table=false
+[PASS] Status reports applied — 5/5 applied, batch=1
+[PASS] Rollback(0) rolls back batch — all tables from batch 1 dropped
+[PASS] Rollback(2) step rollback — order_items + alter down; orders still present
+[PASS] Batch tracking after step rollback — 2 pending
+[PASS] Reset drops everything — no app tables
+[PASS] Refresh re-applies — order_items back
+[PASS] Fresh re-applies from clean schema — order_items back after Fresh
+[PASS] Seeder dependency order (OrderSeeder after deps) — users=21 products=15 orders=10 items=15
+[PASS] Circular dependency detected — err=CircularA -> CircularB -> CircularA: circular seeder dependency
+[PASS] Factory Make — single user: Alice Martinez
+[PASS] Factory MakeMany(20) — 20 users
+[PASS] Factory WithState(admin) — admin role + name=Admin Oscar Smith
+[PASS] DisableTransaction opt-out differs — tx-wrapped rolled back exp_a=false; no-tx kept exp_b=true
+================ Fase 1 coverage ================
+Total: 23 checks, 0 failed

@@ -4,6 +4,7 @@
 /migrator
 /server
 /gostore
+.claude
 
 # Env / secrets
 .env
