@@ -42,6 +42,8 @@ github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b h1:
 github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b/go.mod h1:TUeNWsxEwNyKZVEj0NOGE4Kf/k/MCyW1nfaB89tzKh0=
 github.com/gopackx/go-migration v1.0.0 h1:v4Y+hImanHqhOLuYQSZJoKh6kFCTdDq2U+OOIWN1hOo=
 github.com/gopackx/go-migration v1.0.0/go.mod h1:j9+xlZ9/QPBeidpuDRPXvsIytpeWvFy+r9IBKuGF/sU=
+github.com/gopackx/go-notification v1.0.0 h1:6ClYOCpwGGoUbyPki5e5qzG3m/f4Fv9QaESg6Aek1fs=
+github.com/gopackx/go-notification v1.0.0/go.mod h1:wNnVRw4piJimieDyLqAGQ23LKIgEBTzDEAJIchx9pDI=
 github.com/gopackx/open-swag-go v1.1.1 h1:B7yXFuBpER7BRBD/SdXbIigy4AXDkGPn2MLYgLVK/mM=
 github.com/gopackx/open-swag-go v1.1.1/go.mod h1:uxlx4t/JCIWmO4wm1IWc7tjWtJmqXeNrIQu/NvRuVBU=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=

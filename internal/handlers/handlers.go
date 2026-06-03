@@ -31,11 +31,19 @@ type Notifier interface {
 // Fase 6 and records an audited API call; nil is allowed (skipped).
 type PaymentFunc func(ctx context.Context, order models.Order) error
 
+// NotificationCenter is the read side of go-notification's database channel,
+// satisfied in internal/notify; nil is allowed (endpoints 503).
+type NotificationCenter interface {
+	Unread(ctx context.Context, user models.User) ([]dto.NotificationView, error)
+	MarkAllRead(ctx context.Context, user models.User) error
+}
+
 // Handler bundles the dependencies shared by all endpoints.
 type Handler struct {
 	DB          *gorm.DB
 	Auditor     goaudit.Auditor
 	Notifier    Notifier
+	NotifCenter NotificationCenter
 	Payment     PaymentFunc
 	AdminAPIKey string
 }
@@ -281,6 +289,43 @@ func (h *Handler) AdminListOrders(c *gin.Context) {
 		out = append(out, toOrderResp(o))
 	}
 	c.JSON(http.StatusOK, gin.H{"data": out, "total": len(out)})
+}
+
+// GetNotifications returns the authenticated user's unread in-app notifications.
+func (h *Handler) GetNotifications(c *gin.Context) {
+	user := middleware.User(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized", Code: 401})
+		return
+	}
+	if h.NotifCenter == nil {
+		c.JSON(http.StatusServiceUnavailable, dto.ErrorResponse{Error: "notifications disabled", Code: 503})
+		return
+	}
+	items, err := h.NotifCenter.Unread(c.Request.Context(), *user)
+	if err != nil {
+		serverError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, dto.NotificationListResponse{Data: items, Unread: len(items)})
+}
+
+// MarkNotificationsRead marks all the user's notifications as read.
+func (h *Handler) MarkNotificationsRead(c *gin.Context) {
+	user := middleware.User(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "unauthorized", Code: 401})
+		return
+	}
+	if h.NotifCenter == nil {
+		c.JSON(http.StatusServiceUnavailable, dto.ErrorResponse{Error: "notifications disabled", Code: 503})
+		return
+	}
+	if err := h.NotifCenter.MarkAllRead(c.Request.Context(), *user); err != nil {
+		serverError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, dto.MessageResponse{Message: "all marked read"})
 }
 
 // Showcase returns a sample EdgeShowcase so the docs try-it console renders a

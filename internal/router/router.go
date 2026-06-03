@@ -26,6 +26,8 @@ func New(h *handlers.Handler, db *gorm.DB, docsMount func(*gin.Engine)) *gin.Eng
 	auth.POST("/products/:id/image", h.UploadProductImage)
 	auth.POST("/orders", h.CreateOrder)
 	auth.GET("/orders/:id", h.GetOrder)
+	auth.GET("/notifications", h.GetNotifications)
+	auth.POST("/notifications/read-all", h.MarkNotificationsRead)
 
 	admin := r.Group("/admin", middleware.APIKey(h.AdminAPIKey))
 	admin.GET("/orders", h.AdminListOrders)

@@ -142,7 +142,41 @@ Entry format:
 
 ## go-notification
 
-_(diisi Fase 5)_
+> Verdict Fase 5: **paling matang dari keempatnya.** 9/9 coverage checks PASS
+> (lihat `cmd/notify-demo`): fan-out database+test channel, async pool
+> thread-safe (50 kirim konkuren semua persist), `Sync()` benar-benar blocking,
+> `Via()` override, `OnError` setelah retry habis, `Close()` → `ErrClosed`,
+> rate limiter throttling tanpa crash. Migrate Postgres + database channel mulus.
+> Nyaris tanpa friksi; catatan di bawah minor (DX/DOCS).
+
+### [DX] Dua interface bernama mirip: `Formatter` vs `ChannelFormatter` — [go-notification]
+- `notification.Formatter` = sisi **Channel** (`Format(n Notification, notifiable) (any, error)`).
+- `notification.ChannelFormatter` = sisi **Notification** (`Format(channel string, notifiable) any`).
+  Notifier `format()` mencoba `ch.(Formatter)` dulu, lalu fallback `notif.(ChannelFormatter)`.
+- Keduanya valid (custom channel bisa pilih salah satu jalur), tapi nama yang
+  mirip + dua arah berbeda gampang membingungkan. GoStore pakai jalur
+  `ChannelFormatter` di notifikasi untuk channel "test" (channel tanpa Formatter).
+- Saran: beri nama lebih kontras (mis. `MessageFormatter` untuk sisi channel) +
+  satu contoh "custom channel" eksplisit di README yang menampilkan kedua jalur.
+
+### [DX] `MaxRetries == 0` diam-diam jadi 3 — [go-notification]
+- `applyDefaults`: `if c.MaxRetries == 0 { c.MaxRetries = 3 }`. Untuk benar-benar
+  "tanpa retry" harus set **negatif** (lalu di-clamp ke 0). Nilai nol yang
+  intuitif ("no retries") malah memberi 3 retry. Terdokumentasi di komentar
+  field, tapi tetap footgun. Saran: pakai `*int` atau sentinel terpisah.
+
+### [DX] Rate limiter mem-block (bukan menolak) — perlu disebut eksplisit — [go-notification]
+- `SetRateLimit("rl", 5, 100ms, 5)` lalu 20 kirim `Sync()` → **20/20 terkirim**
+  (Acquire menunggu token), bukan sebagian ditolak `ErrRateLimited`. Wajar &
+  aman, tapi ekspektasi "rate limit" sering dikira drop. Saran: jelaskan di
+  README bahwa Acquire blocking + kapan `ErrRateLimited` muncul (mis. ctx cancel).
+
+### Integrasi positif — "audit menelan notifikasi" TIDAK terjadi
+- go-notification menulis tabel `notifications` lewat **`database/sql` murni**,
+  bukan GORM. Karena itu tulisan notifikasi **tidak pernah** melewati GORM audit
+  plugin → tidak ke-audit, tanpa perlu konfigurasi apa pun. `ExcludeEntities`
+  (Fase 2) tetap dipasang sebagai jaring pengaman bila suatu saat ada yang
+  menulis `notifications` via GORM. Jadi friksi yang dikhawatirkan plan tidak ada.
 
 ## open-swag-go
 

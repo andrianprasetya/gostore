@@ -12,6 +12,7 @@ import (
 	"gostore/internal/db"
 	"gostore/internal/docs"
 	"gostore/internal/handlers"
+	"gostore/internal/notify"
 	"gostore/internal/router"
 
 	"github.com/gin-gonic/gin"
@@ -50,6 +51,12 @@ func main() {
 		log.Fatalf("ensure admin: %v", err)
 	}
 
+	notifySvc, err := notify.Setup(ctx, conn.SQL)
+	if err != nil {
+		log.Fatalf("notify setup: %v", err)
+	}
+	defer notifySvc.Close()
+
 	apiKey := os.Getenv("GOSTORE_ADMIN_API_KEY")
 	if apiKey == "" {
 		apiKey = "gostore-admin-key"
@@ -58,6 +65,8 @@ func main() {
 	h := &handlers.Handler{
 		DB:          conn.Gorm,
 		Auditor:     auditor,
+		Notifier:    notifySvc,
+		NotifCenter: notifySvc,
 		AdminAPIKey: apiKey,
 	}
 

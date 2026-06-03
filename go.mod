@@ -9,6 +9,7 @@ require (
 	github.com/gopackx/go-audit v1.0.0
 	github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b
 	github.com/gopackx/go-migration v1.0.0
+	github.com/gopackx/go-notification v1.0.0
 	github.com/gopackx/open-swag-go v1.1.1
 	golang.org/x/crypto v0.52.0
 	gorm.io/driver/postgres v1.6.0

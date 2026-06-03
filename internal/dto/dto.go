@@ -106,6 +106,23 @@ type MessageResponse struct {
 	Message string `json:"message" example:"ok"`
 }
 
+// --- notifications (in-app) ---
+
+type NotificationView struct {
+	ID        string         `json:"id" example:"abc123"`
+	Type      string         `json:"type" example:"order.placed"`
+	Title     string         `json:"title" example:"Order received"`
+	Body      string         `json:"body" example:"We got your order ORD-2026-0001"`
+	Data      map[string]any `json:"data,omitempty"`
+	Read      bool           `json:"read" example:"false"`
+	CreatedAt time.Time      `json:"created_at" format:"date-time"`
+}
+
+type NotificationListResponse struct {
+	Data   []NotificationView `json:"data"`
+	Unread int                `json:"unread" example:"2"`
+}
+
 // --- doc edge-type showcase (Fase 4) ---
 
 // EdgeShowcase deliberately exercises the schema generator's tricky cases:

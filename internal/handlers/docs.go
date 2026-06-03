@@ -126,9 +126,28 @@ var ShowcaseDoc = openswag.Endpoint{
 	},
 }
 
+var GetNotificationsDoc = openswag.Endpoint{
+	Method: "GET", Path: "/notifications", Summary: "List my unread in-app notifications",
+	Tags: []string{"Notifications"}, Security: []string{openswag.SecurityBearerAuth},
+	Responses: map[int]openswag.Response{
+		200: {Description: "OK", Schema: dto.NotificationListResponse{}},
+		401: {Description: "Unauthorized", Schema: dto.ErrorResponse{}},
+	},
+}
+
+var MarkNotificationsReadDoc = openswag.Endpoint{
+	Method: "POST", Path: "/notifications/read-all", Summary: "Mark all my notifications read",
+	Tags: []string{"Notifications"}, Security: []string{openswag.SecurityBearerAuth},
+	Responses: map[int]openswag.Response{
+		200: {Description: "OK", Schema: dto.MessageResponse{}},
+		401: {Description: "Unauthorized", Schema: dto.ErrorResponse{}},
+	},
+}
+
 // Endpoints is the full co-located set, registered via docs.Setup -> AddAll.
 var Endpoints = []openswag.Endpoint{
 	RegisterDoc, LoginDoc,
 	ListProductsDoc, GetProductDoc, CreateProductDoc, UploadProductImageDoc,
-	CreateOrderDoc, GetOrderDoc, AdminListOrdersDoc, ShowcaseDoc,
+	CreateOrderDoc, GetOrderDoc, AdminListOrdersDoc,
+	GetNotificationsDoc, MarkNotificationsReadDoc, ShowcaseDoc,
 }
