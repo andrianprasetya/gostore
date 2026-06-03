@@ -312,4 +312,45 @@ Entry format:
 
 ## Ringkasan — Top 5 sebelum dipromosiin
 
-_(diisi di akhir)_
+Diurutkan dari yang paling worth diperbaiki sebelum keempat package dipromosikan
+(mis. di LinkedIn). Detail + repro ada di section masing-masing di atas.
+
+1. **[BUG · go-audit/gorm] `.Where("…").Update/Delete` → `WHERE WHERE` (SQLSTATE 42601)
+   yang membatalkan tulisan.** Pola GORM paling umum patah saat plugin aktif;
+   GoStore terpaksa pakai update berbasis primary-key di seluruh handler. Ini
+   blocker adopsi #1. → perbaiki `snapshotRows` (jangan re-inject klausa WHERE mentah).
+
+2. **[DOCS · open-swag-go] README mendokumentasikan API yang tidak ada di v1.1.1.**
+   `Body/Response/Responses/BearerAuth/AuthConfig/PathParam…` semuanya tidak ada;
+   Quick Start tidak compile. Hal pertama yang dicoba user langsung gagal. →
+   sinkronkan README dengan API struct-literal yang sebenarnya (atau tambah helper-nya).
+
+3. **[BUG · open-swag-go] Tipe struct self-referential → stack overflow saat generate spec.**
+   Model tree/menu/komentar berjenjang meng-crash boot server. → tambah visited-set + `$ref`.
+
+4. **[BUG · go-audit/gorm] Nested `Create` (asosiasi) menggandakan audit row anak.**
+   2 order_items → 4 audit row. Mengotori trail untuk relasi nested yang sangat umum.
+   → dedup per (entity, id, action, txID) / rekam hanya pada insert awal.
+
+5. **[BUG · open-swag-go] `RequestBody.ContentType` diabaikan → upload multipart salah-dokumen.**
+   Semua body dipaksa `application/json`; endpoint file-upload terdokumentasi keliru.
+   → pakai `ContentType` saat membangun requestBody.
+
+**Honorable mentions:** version-diff tak mendeteksi perubahan tipe field
+(`BreakingTypeChanged` tak terpasang); `RedactBodyFields` lewat body struct;
+`old_values` create tersimpan sebagai literal `null`; README go-migration pakai
+`.OnDelete()` (harusnya `.OnDeleteAction()`); `make:seeder` tak auto-register.
+
+## Catatan keseluruhan (verdict)
+
+- **go-notification** — paling matang, nyaris tanpa friksi. Siap dipromosikan.
+- **go-migration** — solid; temuan mayoritas DOCS/DX kecil. Hampir siap.
+- **go-audit** — fitur kuat & demo "time-travel"/korelasi txID sangat menjual,
+  tapi **2 BUG GORM-adapter** (WHERE WHERE + duplikasi nested) harus beres dulu.
+- **open-swag-go** — engine schema & UI bagus (edge-type → TS mulus, Gin==Chi),
+  tapi **README menyesatkan + 2 BUG** (recursion, ContentType). Perlu polish sebelum promo.
+
+> Semua diuji di PostgreSQL 16 asli (embedded-postgres, tanpa Docker). Total 5
+> harness verifikasi: `cmd/migrate-demo` (23 cek), `cmd/audit-demo` (18),
+> `cmd/notify-demo` (9), `cmd/version-diff`, `cmd/recursion-test` — semua hijau
+> (recursion-test sengaja meng-crash untuk membuktikan bug).

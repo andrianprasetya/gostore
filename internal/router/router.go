@@ -15,6 +15,7 @@ func New(h *handlers.Handler, db *gorm.DB, docsMount func(*gin.Engine)) *gin.Eng
 	r := gin.New()
 	r.Use(gin.Recovery(), middleware.Transaction())
 
+	r.GET("/", func(c *gin.Context) { c.Redirect(302, "/docs/") })
 	r.POST("/auth/register", h.Register)
 	r.POST("/auth/login", h.Login)
 	r.GET("/products", h.ListProducts)

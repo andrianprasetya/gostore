@@ -1,0 +1,41 @@
+2026/06/03 14:51:22 wrote spec/openapi-v1.json (46404 bytes)
+2026/06/03 14:51:22 wrote spec/openapi-v2.json (40395 bytes)
+
+Breaking changes: true
+Summary: added=0 removed=1 modified=2 breaking=4
+
+-- Breaking detail --
+  [get /showcase] Endpoint removed
+      migration: Update client code to use alternative endpoint or remove usage
+  [post /products] New required field: currency
+      migration: Add the new required field to request payload
+  [post /products] New required parameter: reason
+      migration: Review the change and update client code accordingly
+  [get /products/{id}] Response code 404 removed
+      migration: Update client to handle the removed response code
+
+-- Changelog (markdown) --
+## [2.0.0] - 2026-06-03
+
+### ⚠️ Breaking Changes
+
+- Removed endpoint: get /showcase
+- New required field: currency
+- New required parameter: reason
+- Response code 404 removed
+
+### Changed
+
+- New required field: currency
+- New required parameter: reason
+- Response code 404 removed
+
+### Removed
+
+- Removed endpoint: get /showcase
+
+
+-- NOTE (finding) --
+  The price number->object change on POST /products is a RESPONSE/BODY field
+  TYPE change; the differ only checks required-fields/response-codes/params,
+  so this type change is NOT reported. See FINDINGS.

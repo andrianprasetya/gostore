@@ -1,0 +1,16 @@
+{
+    "data": [
+        {
+            "id": "18b1b61c-4046-4964-96a5-532a1b33f1b7",
+            "type": "user.welcome",
+            "title": "Welcome to GoStore!",
+            "body": "Hi Ada Lovelace, thanks for signing up.",
+            "data": {
+                "name": "Ada Lovelace"
+            },
+            "read": false,
+            "created_at": "2026-06-03T14:51:04.875791+07:00"
+        }
+    ],
+    "unread": 1
+}

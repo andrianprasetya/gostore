@@ -1,0 +1,7 @@
+[PASS] Soft delete -> action soft_delete — 1 soft_delete log(s)
+[PASS] Unscoped (hard) delete -> action delete — 1 delete log(s)
+[PASS] API redacts Authorization header — header redacted, token gone
+[PASS] API redacts body fields (card_number, cvv) — card_number + cvv redacted in stored body
+[PASS] txID correlates data-change + API-call — data=1 api=1 under one txID
+[PASS] Snapshot reconstructs past state — price@midpoint=20 (expected 20)
+[PASS] Restore records action=restore — restore entry written, target price=20

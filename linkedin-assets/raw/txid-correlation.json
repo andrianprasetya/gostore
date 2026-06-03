@@ -1,0 +1,123 @@
+{
+    "transaction_id": "20260603T075105-f3419dad63cbbadc2d9e364a19bb28a2",
+    "data_changes": [
+        {
+            "id": 8,
+            "entity_type": "orders",
+            "entity_id": "11",
+            "action": "update",
+            "old_values": {
+                "created_at": "2026-06-03T14:51:05.035895+07:00",
+                "status": "pending",
+                "updated_at": "2026-06-03T14:51:05.035895+07:00"
+            },
+            "new_values": {
+                "created_at": "2026-06-03T14:51:05.0358955+07:00",
+                "status": "paid",
+                "updated_at": "2026-06-03T14:51:05.11257+07:00"
+            },
+            "user_id": "23",
+            "created_at": "2026-06-03T14:51:05.115093+07:00"
+        },
+        {
+            "id": 7,
+            "entity_type": "order_items",
+            "entity_id": "17",
+            "action": "create",
+            "new_values": {
+                "created_at": "2026-06-03T14:51:05.0367+07:00",
+                "id": 17,
+                "order_id": 11,
+                "product_id": 3,
+                "quantity": 1,
+                "unit_price": 727.02,
+                "updated_at": "2026-06-03T14:51:05.0367+07:00"
+            },
+            "user_id": "23",
+            "created_at": "2026-06-03T14:51:05.114458+07:00"
+        },
+        {
+            "id": 6,
+            "entity_type": "order_items",
+            "entity_id": "16",
+            "action": "create",
+            "new_values": {
+                "created_at": "2026-06-03T14:51:05.0367+07:00",
+                "id": 16,
+                "order_id": 11,
+                "product_id": 1,
+                "quantity": 2,
+                "unit_price": 510.8,
+                "updated_at": "2026-06-03T14:51:05.0367+07:00"
+            },
+            "user_id": "23",
+            "created_at": "2026-06-03T14:51:05.113845+07:00"
+        },
+        {
+            "id": 5,
+            "entity_type": "orders",
+            "entity_id": "11",
+            "action": "create",
+            "new_values": {
+                "created_at": "2026-06-03T14:51:05.0358955+07:00",
+                "id": 11,
+                "order_number": "ORD-20260603-075105",
+                "status": "pending",
+                "total": 1748.62,
+                "updated_at": "2026-06-03T14:51:05.0358955+07:00",
+                "user_id": 23
+            },
+            "user_id": "23",
+            "created_at": "2026-06-03T14:51:05.098381+07:00"
+        },
+        {
+            "id": 4,
+            "entity_type": "order_items",
+            "entity_id": "17",
+            "action": "create",
+            "new_values": {
+                "created_at": "2026-06-03T14:51:05.0367+07:00",
+                "id": 17,
+                "order_id": 11,
+                "product_id": 3,
+                "quantity": 1,
+                "unit_price": 727.02,
+                "updated_at": "2026-06-03T14:51:05.0367+07:00"
+            },
+            "user_id": "23",
+            "created_at": "2026-06-03T14:51:05.096599+07:00"
+        },
+        {
+            "id": 3,
+            "entity_type": "order_items",
+            "entity_id": "16",
+            "action": "create",
+            "new_values": {
+                "created_at": "2026-06-03T14:51:05.0367+07:00",
+                "id": 16,
+                "order_id": 11,
+                "product_id": 1,
+                "quantity": 2,
+                "unit_price": 510.8,
+                "updated_at": "2026-06-03T14:51:05.0367+07:00"
+            },
+            "user_id": "23",
+            "created_at": "2026-06-03T14:51:05.037374+07:00"
+        }
+    ],
+    "api_calls": [
+        {
+            "id": 1,
+            "service": "payment-gateway",
+            "endpoint": "/v1/charges",
+            "method": "POST",
+            "status_code": 200,
+            "duration_ms": 5,
+            "created_at": "2026-06-03T14:51:05.104547+07:00"
+        }
+    ],
+    "summary": {
+        "api_calls": 1,
+        "data_changes": 6
+    }
+}
