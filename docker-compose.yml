@@ -1,0 +1,21 @@
+# Optional: use this if you have Docker. Otherwise GoStore boots an embedded
+# Postgres automatically (see internal/db/db.go) when DATABASE_URL is unset.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: gostore
+      POSTGRES_USER: gostore
+      POSTGRES_PASSWORD: gostore
+    ports:
+      - "5432:5432"
+    volumes:
+      - gostore_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gostore -d gostore"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  gostore_pg:

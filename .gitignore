@@ -1,0 +1,16 @@
+# Binaries
+*.exe
+*.exe~
+/migrator
+/server
+/gostore
+
+# Env / secrets
+.env
+
+# Local artifacts
+/uploads/
+*.log
+
+# Node (frontend-types tooling)
+node_modules/
