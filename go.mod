@@ -4,6 +4,8 @@ go 1.26.2
 
 require (
 	github.com/fergusstrange/embedded-postgres v1.34.0
+	github.com/gopackx/go-audit v1.0.0
+	github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b
 	github.com/gopackx/go-migration v1.0.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1

@@ -13,6 +13,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"time"
@@ -52,13 +53,20 @@ func Open() (*Conn, error) {
 	var stop func() error
 
 	if dsn == "" {
-		log.Println("[db] DATABASE_URL unset → starting embedded Postgres (no Docker)")
-		ep, err := startEmbedded()
-		if err != nil {
-			return nil, fmt.Errorf("start embedded postgres: %w", err)
+		if portOpen("localhost:5432") {
+			// A Postgres (likely an embedded instance leaked by a previous run,
+			// or a local server) is already listening — reuse it.
+			log.Println("[db] DATABASE_URL unset but :5432 is serving → reusing it")
+			dsn = embeddedDSN
+		} else {
+			log.Println("[db] DATABASE_URL unset → starting embedded Postgres (no Docker)")
+			ep, err := startEmbedded()
+			if err != nil {
+				return nil, fmt.Errorf("start embedded postgres: %w", err)
+			}
+			stop = ep.Stop
+			dsn = embeddedDSN
 		}
-		stop = ep.Stop
-		dsn = embeddedDSN
 	}
 
 	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -90,6 +98,16 @@ func Open() (*Conn, error) {
 	}
 
 	return &Conn{Gorm: gormDB, SQL: sqlDB, DSN: dsn, stop: stop}, nil
+}
+
+// portOpen reports whether something is accepting TCP connections at addr.
+func portOpen(addr string) bool {
+	c, err := net.DialTimeout("tcp", addr, 500*time.Millisecond)
+	if err != nil {
+		return false
+	}
+	_ = c.Close()
+	return true
 }
 
 func startEmbedded() (*embeddedpostgres.EmbeddedPostgres, error) {

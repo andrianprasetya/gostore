@@ -5,6 +5,10 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fergusstrange/embedded-postgres v1.34.0 h1:c6RKhPKFsLVU+Tdxsx8q0UxCHsvZZ/iShAnljRBXs6s=
 github.com/fergusstrange/embedded-postgres v1.34.0/go.mod h1:w0YvnCgf19o6tskInrOOACtnqfVlOvluz3hlNLY7tRk=
+github.com/gopackx/go-audit v1.0.0 h1:s4RC1Sco7YWwYb6XMjGUnIZ7svlv1xZQWkSCikSHIfQ=
+github.com/gopackx/go-audit v1.0.0/go.mod h1:/q0xTYeht2/nUnCTr9rJQ8HgZ+iQAMhNi3VK1fhku4Y=
+github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b h1:2JU8tEwBtIEJrA84XdOWpnzSpP1agiUcZfGXJ652Kbc=
+github.com/gopackx/go-audit/adapters/gorm v0.0.0-20260417032849-9aa53af2642b/go.mod h1:TUeNWsxEwNyKZVEj0NOGE4Kf/k/MCyW1nfaB89tzKh0=
 github.com/gopackx/go-migration v1.0.0 h1:v4Y+hImanHqhOLuYQSZJoKh6kFCTdDq2U+OOIWN1hOo=
 github.com/gopackx/go-migration v1.0.0/go.mod h1:j9+xlZ9/QPBeidpuDRPXvsIytpeWvFy+r9IBKuGF/sU=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=

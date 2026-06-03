@@ -73,7 +73,72 @@ Entry format:
 
 ## go-audit
 
-_(diisi Fase 2)_
+> Verdict Fase 2: **kuat, tapi ada 1 BUG tajam.** 18/18 coverage checks PASS
+> (lihat `cmd/audit-demo`): auto-capture CUD + diff, ExcludeFields, soft/hard
+> delete, API redaction header+body + truncation, txID correlation, snapshot/
+> restore time-travel, query, purge, ExcludeEntities. Bug `WHERE WHERE` di bawah
+> wajib diperbaiki sebelum dipromosiin.
+
+### [BUG] GORM adapter: `.Where("...").Update/Delete` menghasilkan `WHERE WHERE` (42601) — [go-audit/adapters/gorm]
+- Fitur: snapshot old_values sebelum UPDATE/DELETE (`callbacks.go:snapshotRows`, line ~142).
+- Ekspektasi: `db.Model(&X{}).Where("id = ?", id).Update(...)` ke-audit normal.
+- Aktual: snapshot SELECT yang di-generate **double WHERE**:
+  `SELECT * FROM "products" WHERE WHERE id = 1 AND "products"."deleted_at" IS NULL`
+  → `ERROR: syntax error at or near "WHERE" (SQLSTATE 42601)`. Di mode default
+  `ErrorFailLoud` error ini di-`AddError` ke `*gorm.DB`, sehingga **membatalkan
+  tulisan user** (UPDATE/DELETE tidak jalan). Pola `Model(&x).Update(...)`
+  berbasis primary key TIDAK kena (WHERE diturunkan dari PK).
+- Root cause: `snapshotRows` mengambil `db.Statement.Clauses["WHERE"]` lalu
+  memasangnya ulang via `q.Clauses(c)` pada query baru. Untuk statement yang
+  WHERE-nya dibangun dari kondisi string `.Where("...")`, klausa itu sudah
+  membawa keyword `WHERE`, jadi tergandakan.
+- Repro (deterministik, ada di `cmd/audit-demo`):
+  ```go
+  gdb.WithContext(ctx).Model(&models.Product{}).Where("id = ?", id).Update("stock", 7)
+  // err: go-audit: snapshot before update: ERROR: syntax error at or near "WHERE"
+  ```
+- Dampak: tinggi — `Model().Where(string).Update/Delete` adalah pola GORM yang
+  sangat umum. Semua write seperti ini gagal saat plugin aktif.
+- Saran: jangan re-inject klausa WHERE mentah; bangun ulang kondisi via
+  `q.Where(db.Statement.Clauses["WHERE"].Expression)` atau salin `conds`-nya,
+  bukan `Clauses(c)`. Tambahkan test untuk update/delete berbasis string-where.
+
+### [BUG] `old_values` pada CREATE tersimpan sebagai literal JSON `null`, bukan SQL NULL — [go-audit]
+- Fitur: `RecordDataChange` untuk action create.
+- Ekspektasi: kolom `old_values` = SQL `NULL` saat create (tidak ada state lama).
+- Aktual: tersimpan sebagai jsonb literal `null` (4 byte). Penyebab: `diffResult`
+  mengembalikan `oldOut` bertipe `map[string]any` **nil**, lalu di-pass ke
+  `jsonMarshal(v any)`. Guard `if v == nil` meleset karena nil-map yang di-box ke
+  `any` ≠ `nil` → `json.Marshal(nilMap)` = `null`.
+- Repro: create apa pun lewat GORM → `SELECT old_values` = `null` (string), bukan NULL.
+- Dampak: kosmetik tapi membingungkan konsumen yang membedakan NULL vs `null`.
+- Saran: di `jsonMarshal` cek juga nil via reflect (`reflect.ValueOf(v).IsNil()` untuk map/slice/ptr), atau di `RecordDataChange` lewatkan `nil` eksplisit saat map kosong.
+
+### [DX/DOCS] `RedactBodyFields` tidak meredaksi body bertipe struct — [go-audit]
+- Fitur: redaksi body API (`redactBody`/`redactWalk`).
+- Ekspektasi: README API logging memakai `RequestBody: req` di mana `req` adalah **struct**.
+- Aktual: `redactWalk` hanya menangani `map[string]any` & `[]any`; struct jatuh
+  ke `default` dan dikembalikan apa adanya → **tidak ter-redaksi**. Jadi contoh
+  README (struct) menyimpan field sensitif tanpa redaksi. Yang ter-redaksi hanya
+  body yang sudah berupa `map[string]any` (terbukti PASS di demo saat pakai map).
+- Saran: marshal→unmarshal ke `map[string]any` sebelum walk, atau reflect ke
+  struct; minimal dokumentasikan bahwa body harus map/slice agar redaksi jalan.
+
+### [DOCS] `ExcludeEntities` ada tapi tidak didokumentasikan — [go-audit]
+- Fitur: exclude **tabel** dari audit (`DataAuditConfig.ExcludeEntities`).
+- Konteks: plan menduga exclude-table mungkin `MISSING` (README cuma menampilkan
+  `ExcludeFields`). Faktanya `ExcludeEntities []string` **ada dan bekerja** —
+  GoStore memakainya untuk menjaga tabel `notifications` (+ tabel audit/infra)
+  keluar dari trail (demo: 0 audit row untuk `notifications`). Ini menyelesaikan
+  friksi "audit menelan notifikasi".
+- Saran: dokumentasikan `ExcludeEntities` di README (sangat berguna untuk integrasi).
+
+### [DX] Catatan kecil
+- `APIEntry` tidak punya `ResponseHeaders` (hanya `RequestHeaders`), walau bagian
+  "Schema" README menyebut "request/response headers". Konsisten kan dokumen vs tipe.
+- Default mode `ErrorFailLoud` mengikat keberhasilan write app ke ketersediaan
+  audit store — wajar untuk compliance, tapi kombinasi dgn bug `WHERE WHERE` di
+  atas membuat write gagal total. `ErrorFailSilent` tersedia sebagai mitigasi.
 
 ## go-notification
 
